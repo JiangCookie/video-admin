@@ -40,6 +40,7 @@ public class VideoAdminApplication implements WebMvcConfigurer {
                  */
                 .addPathPatterns("/manage/**")
                 .excludePathPatterns(path);
+
     }
 
 
