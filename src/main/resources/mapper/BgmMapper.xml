@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jyh.videoadmin.mapper.BgmMapper">
+  <resultMap id="BaseResultMap" type="com.jyh.videoadmin.pojo.Bgm">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" jdbcType="INTEGER" property="id" />
+    <result column="author" jdbcType="VARCHAR" property="author" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="path" jdbcType="VARCHAR" property="path" />
+  </resultMap>
+
+
+  <insert id="saveReturnPK" keyProperty="id" parameterType="com.jyh.videoadmin.pojo.Bgm" useGeneratedKeys="true">
+    insert into bgm (author,name,path) values (#{author},#{name},#{path})
+  </insert>
+
+</mapper>

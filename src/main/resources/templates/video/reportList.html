@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>饼人视频管理后台</title>
+    <meta name="keywords" content="H+后台主题,后台bootstrap框架,会员中心主题,后台HTML,响应式后台">
+    <meta name="description" content="H+是一个完全响应式，基于Bootstrap3最新版本开发的扁平化主题，她采用了主流的左右两栏式布局，使用了Html5+CSS3等现代技术">
+
+    <link rel="shortcut icon" href="favicon.ico"> <link th:href="@{/css/bootstrap.min.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/css/font-awesome.css?v=4.4.0}" rel="stylesheet">
+
+    <!-- jqgrid-->
+    <link th:href="@{/css/plugins/jqgrid/ui.jqgrid.css?0820}" rel="stylesheet">
+
+    <link th:href="@{/css/animate.css}" rel="stylesheet">
+    <link th:href="@{/css/style.css?v=4.1.0}" rel="stylesheet">
+
+    <style>
+        /* Additional style to fix warning dialog position */
+
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+    </style>
+
+</head>
+
+<body class="gray-bg">
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-sm-4">
+        <h2 >举报列表</h2>
+        <ol class="breadcrumb">
+            <li>
+                <span>主页</span>
+                <i class="fa fa-circle"></i>
+            </li>
+            <li>
+                <span>举报管理</span>
+                <i class="fa fa-circle"></i>
+            </li>
+            <li>
+                <span>举报列表</span>
+            </li>
+        </ol>
+    </div>
+</div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox ">
+                <div class="ibox-content">
+                    <!--<h4>音乐</h4>-->
+                    <div class="jqGrid_wrapper">
+                        <table id="table_list"></table>
+                        <div id="pager_list" ></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 全局js -->
+<script th:src="@{/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/js/bootstrap.min.js?v=3.3.6}"></script>
+
+
+
+<!-- Peity -->
+<script th:src="@{/js/plugins/peity/jquery.peity.min.js}"></script>
+
+<!-- jqGrid -->
+<script th:src="@{/js/plugins/jqgrid/i18n/grid.locale-cn.js?0820}"></script>
+<script th:src="@{/js/plugins/jqgrid/jquery.jqGrid.min.js?0820}"></script>
+
+<!-- 自定义js -->
+<script th:src="@{/js/content.js?v=1.0.0}"></script>
+
+<!-- Page-Level Scripts -->
+<script>
+    var forbidVideo = function(videoId) {
+
+        var flag = window.confirm("是否禁播");
+        if (!flag) {
+            return;
+        }
+
+        $.ajax({
+            url: "http://localhost:8082" + "/video/updateVideoStatus?videoId=" + videoId,
+            type: "POST",
+            async: false,
+            success: function(data) {
+                if(data.status == 200 && data.msg == "OK") {
+                    alert("操作成功");
+                    var jqGrid = $("#table_list");
+                    jqGrid.jqGrid().trigger("reloadGrid");
+                } else {
+                    console.log(JSON.stringify(data));
+                }
+            }
+        })
+    }
+
+    $(document).ready(function () {
+
+        $.jgrid.defaults.styleUI = 'Bootstrap';
+
+
+
+        //表格配置
+        $("#table_list").jqGrid({
+            url : "http://localhost:8082" + "/video/reportList",
+            mtype: "post",        //ajax提交方式
+            datatype : "json",   //从服务器端返回的数据类型
+            height: 300,         //表格高度
+            autowidth: true,
+            shrinkToFit: true,
+            pager: "#pager_list",  // 分页控件的id
+            viewrecords: true,      // 定义是否要显示总记录数
+            caption: "Bgm Music",
+            hidegrid: false,     //启用或者禁用控制表格显示、隐藏的按钮
+            rowNum: 8,          // 在grid上显示记录条数，这个参数是要被传递到后台
+            rownumbers: true,  			// 如果为ture则会在表格左边新增一列，显示行顺序号，从1开始递增。此列名为'rn'
+            rowList: [10, 20, 30],
+            colNames: ['ID', '举报类型', '举报内容', '被举报人', '被举报视频id', '被举报视频', '视频状态', '提交用户', '举报日期', "操作"],
+            colModel: [
+                { name: 'id', index: 'id', width: 30, sortable: false, hidden: false },
+                { name: 'title', index: 'title', width: 30, sortable: false },
+                { name: 'content', index: 'content', width: 60, sortable: false },
+                { name: 'dealUsername', index: 'dealUsername', width: 20, sortable: false },
+                { name: 'dealVideoId', index: 'dealVideoId', width: 30, sortable: false },
+                { name: 'videoPath', index: 'videoPath', width: 30, sortable: false,
+                    formatter:function(value, options, rowObject) {
+                        var src = "http://localhost:8082" + value;
+                        var display = "<a href='" + src + "' target='_blank'>点我播放</a>"
+                        return display;
+                    }
+                },
+                { name: 'status', index: 'status', width: 40, sortable: false, hidden: false,
+                    formatter:function(value, options, rowObject) {
+                        return value==1 ? '正常' : '禁播';
+                    }
+                },
+                { name: 'submitUsername', index: 'submitUsername', width: 20, sortable: false },
+                { name: 'createDate', index: 'createDate', width: 40, sortable: false, hidden: false,
+                    formatter:function(value, options, rowObject) {
+                        var createTime = Common.formatTime(value,'yyyy-MM-dd HH:mm:ss');
+                        return createTime;
+                    }
+                },
+                { name: '', index: '', width: 20, sortable: false, hidden: false,
+                    formatter:function(value, options, rowObject) {
+                        var button = '<button class="btn btn-outline blue-chambray" onclick=forbidVideo("'+rowObject.dealVideoId+'")  style="padding: 1px 3px 1px 3px;" type="button">禁止播放</button>';
+
+                        return button;
+                    }
+                }
+            ],
+
+        });
+
+
+
+
+
+        var Common = function () {
+
+            return {
+                // 初始化各个函数及对象
+                init: function () {
+
+                },
+
+                strIsNotEmpty: function(str) {
+                    if (str != null && str != undefined && str != '') {
+                        return true;
+                    }
+                    return false;
+                },
+
+                // 时间戳转换成指定日期格式
+                formatTime: function(time, format) {
+                    var t = new Date(time);
+                    var tf = function(i){return (i < 10 ? '0' : '') + i};
+                    return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function(a){
+                        switch(a){
+                            case 'yyyy':
+                                return tf(t.getFullYear());
+                                break;
+                            case 'MM':
+                                return tf(t.getMonth() + 1);
+                                break;
+                            case 'mm':
+                                return tf(t.getMinutes());
+                                break;
+                            case 'dd':
+                                return tf(t.getDate());
+                                break;
+                            case 'HH':
+                                return tf(t.getHours());
+                                break;
+                            case 'ss':
+                                return tf(t.getSeconds());
+                                break;
+                        }
+                    })
+                }
+
+
+            };
+
+        }();
+
+        // Add responsive to jqGrid
+        $(window).bind('resize', function () {
+            var width = $('.jqGrid_wrapper').width();
+            $('#table_list').setGridWidth(width);
+        });
+    });
+</script>
+
+<script type="text/javascript" src="http://tajs.qq.com/stats?sId=9051096" charset="UTF-8"></script>
+<!--统计代码，可删除-->
+
+</body>
+
+</html>

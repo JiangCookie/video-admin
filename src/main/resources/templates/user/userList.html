@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>饼人视频管理后台</title>
+    <meta name="keywords" content="H+后台主题,后台bootstrap框架,会员中心主题,后台HTML,响应式后台">
+    <meta name="description" content="H+是一个完全响应式，基于Bootstrap3最新版本开发的扁平化主题，她采用了主流的左右两栏式布局，使用了Html5+CSS3等现代技术">
+
+    <link rel="shortcut icon" href="favicon.ico"> <link th:href="@{/css/bootstrap.min.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/css/font-awesome.css?v=4.4.0}" rel="stylesheet">
+
+    <!-- jqgrid-->
+    <link th:href="@{/css/plugins/jqgrid/ui.jqgrid.css?0820}" rel="stylesheet">
+
+    <link th:href="@{/css/animate.css}" rel="stylesheet">
+    <link th:href="@{/css/style.css?v=4.1.0}" rel="stylesheet">
+
+    <style>
+        /* Additional style to fix warning dialog position */
+
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+    </style>
+
+</head>
+
+<body class="gray-bg">
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-sm-4">
+        <h2 >用户列表</h2>
+        <ol class="breadcrumb">
+            <li>
+                <span>主页</span>
+                <i class="fa fa-circle"></i>
+            </li>
+            <li>
+                <span>用户信息</span>
+                <i class="fa fa-circle"></i>
+            </li>
+            <li>
+                <span>用户列表</span>
+            </li>
+        </ol>
+    </div>
+</div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <!-- 搜索内容 -->
+        <div class="col-md-12">
+            <br/>
+            <form id="searchUserListForm" class="form-inline" method="post" role="form">
+                <div class="form-group">
+                    <label class="sr-only" for="username">用户名:</label>
+                    <input id="username" name="username" type="text" class="form-control" placeholder="用户名" />
+                </div>
+                <div class="form-group">
+                    <label class="sr-only" for="nickname">昵称:</label>
+                    <input id="nickname" name="nickname" type="text" class="form-control" placeholder="昵称" />
+                </div>
+                <button id="searchUserListButton" class="btn yellow-casablanca" type="button">搜    索</button>
+            </form>
+        </div>
+        <div class="col-sm-12">
+            <div class="ibox ">
+                <div class="ibox-content">
+                    <!--<h4>音乐</h4>-->
+                    <div class="jqGrid_wrapper">
+                        <table id="table_list"></table>
+                        <div id="pager_list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 全局js -->
+<script th:src="@{/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/js/bootstrap.min.js?v=3.3.6}"></script>
+
+
+
+<!-- Peity -->
+<script th:src="@{/js/plugins/peity/jquery.peity.min.js}"></script>
+
+<!-- jqGrid -->
+<script th:src="@{/js/plugins/jqgrid/i18n/grid.locale-cn.js?0820}"></script>
+<script th:src="@{/js/plugins/jqgrid/jquery.jqGrid.min.js?0820}"></script>
+
+<!-- 自定义js -->
+<script th:src="@{/js/content.js?v=1.0.0}"></script>
+
+<!-- Page-Level Scripts -->
+<script>
+    $(document).ready(function () {
+
+        $.jgrid.defaults.styleUI = 'Bootstrap';
+
+
+
+        //表格配置
+        $("#table_list").jqGrid({
+            url : "http://localhost:8082" + "/user/userList",
+            mtype: "post",        //ajax提交方式
+            datatype : "json",   //从服务器端返回的数据类型
+            height: 300,         //表格高度
+            autowidth: true,
+            shrinkToFit: true,
+            pager: "#pager_list",  // 分页控件的id
+            viewrecords: true,      // 定义是否要显示总记录数
+            caption: "Bgm Music",
+            hidegrid: false,     //启用或者禁用控制表格显示、隐藏的按钮
+            rowNum: 8,          // 在grid上显示记录条数，这个参数是要被传递到后台
+            rownumbers: true,  			// 如果为ture则会在表格左边新增一列，显示行顺序号，从1开始递增。此列名为'rn'
+            rowList: [10, 20, 30],
+            colNames: ['ID', '头像', '用户名', '昵称', '粉丝数', '关注数', '获赞数'],
+            colModel: [
+                { name: 'id', index: 'id', width: 30, sortable: false, hidden: false },
+                { name: 'faceImage', index: 'faceImage', width: 30,
+                    formatter:function (value,options,rowObject) {
+                        var src = "http://localhost:8082" + value;
+                        var img = "<img src='" + src +"' width='60' height='60' />"
+                        return img;
+                    }
+                },
+                { name: 'username', index: 'password', width: 30, sortable: false },
+                { name: 'nickname', index: 'nickname', width: 30, sortable: false },
+                { name: 'fansCounts', index: 'age', width: 20, sortable: false },
+                { name: 'followCounts', index: 'sexValue', width: 20, sortable: false },
+                { name: 'receiveLikeCounts', index: 'province', width: 20, sortable: false, hidden: false }
+
+            ]
+
+        });
+
+        $("#searchUserListButton").click(function(){
+            var searchUsersListForm = $("#searchUserListForm");
+            $("#table_list").jqGrid().setGridParam({
+                page:1,
+                url: "http://localhost:8082" + "/user/userList?" + searchUsersListForm.serialize()
+            }).trigger("reloadGrid");
+        })
+
+
+        // Add responsive to jqGrid
+        $(window).bind('resize', function () {
+            var width = $('.jqGrid_wrapper').width();
+            $('#table_list').setGridWidth(width);
+        });
+    });
+</script>
+
+<script type="text/javascript" src="http://tajs.qq.com/stats?sId=9051096" charset="UTF-8"></script>
+<!--统计代码，可删除-->
+
+</body>
+
+</html>

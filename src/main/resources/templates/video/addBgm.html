@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>饼人视频管理后台 - 增加Bgm</title>
+    <meta name="keywords" content="H+后台主题,后台bootstrap框架,会员中心主题,后台HTML,响应式后台">
+    <meta name="description" content="H+是一个完全响应式，基于Bootstrap3最新版本开发的扁平化主题，她采用了主流的左右两栏式布局，使用了Html5+CSS3等现代技术">
+
+    <link rel="shortcut icon" href="favicon.ico"> <link th:href="@{/css/bootstrap.min.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/css/font-awesome.css?v=4.4.0}" rel="stylesheet">
+
+    <link th:href="@{/css/animate.css}" rel="stylesheet">
+    <link th:href="@{/css/style.css?v=4.1.0}" rel="stylesheet">
+
+
+
+</head>
+
+<body class="gray-bg">
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-sm-4">
+        <h2 >添加背景音乐</h2>
+        <ol class="breadcrumb">
+            <li>
+                <span>主页</span>
+                <i class="fa fa-circle"></i>
+            </li>
+            <li>
+                <span>Bgm管理</span>
+                <i class="fa fa-circle"></i>
+            </li>
+            <li>
+                <span>添加背景音乐</span>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content">
+    <div class="tabbable-line boxless tabbable-reversed">
+        <div class="portlet box green-jungle">
+            <div class="portlet-body form">
+
+                <!-- BEGIN FORM-->
+                <form id="addBgmForm" class="form-horizontal">
+                    <div class="form-body">
+
+                        <div class="form-group">
+                            <label class="col-md-3 control-label"><span class="field-required"> * </span>歌手：</label>
+                            <div class="col-md-4">
+                                <div class="input-error">
+                                    <input id="author" name="author" type="text" class="form-control" placeholder="1-4字">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-3 control-label"><span class="field-required"> * </span>歌曲：</label>
+                            <div class="col-md-4">
+                                <div class="input-error">
+                                    <input id="name" name="name" type="text" class="form-control" placeholder="1-50字">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-3 control-label"><span class="field-required"> * </span>音乐片段：</label>
+                            <div class="col-md-4">
+                                <div class="input-error">
+                                    <input type="hidden" id="path" name="path" class="form-control"/>
+                                    <input id="file" type="file" name="file" data-url="/video/bgmUpload" accept=".mp3" class="form-control">
+                                    <div id="bgmContent"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="form-actions">
+                        <div class="row">
+                            <div class="col-md-offset-3 col-md-9">
+                                <button type="submit" class="btn green-jungle">提 交</button>
+                                <button type="reset" class="btn grey-salsa btn-outline">取  消</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <!-- END FORM-->
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 全局js -->
+<script th:src="@{/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/js/bootstrap.min.js?v=3.3.6}"></script>
+
+<!-- 自定义js -->
+<script th:src="@{/js/content.js?v=1.0.0}"></script>
+
+<!-- 第三方插件 -->
+<script th:src="@{/plugins/uploadFile/jquery.ui.widget.js}"></script>
+<script th:src="@{/plugins/uploadFile/jquery.iframe-transport.js}"></script>
+<script th:src="@{/plugins/uploadFile/jquery.fileupload.js}"></script>
+<script th:src="@{/plugins/jquery.form.js}"></script>
+<script src="http://static.runoob.com/assets/jquery-validation-1.14.0/dist/jquery.validate.min.js"></script>
+
+<script type="text/javascript" src="http://tajs.qq.com/stats?sId=9051096" charset="UTF-8"></script>
+<!--统计代码，可删除-->
+
+<script type="text/javascript">
+
+    $("#file").fileupload({
+        pasteZone: "#bgmContent",
+        dataType: "json",
+        done: function(e, data) {
+            console.log(data);
+
+            if (data.result.status != '200') {
+                alert("长传失败...");
+            } else {
+                // var bgmServer = $("#bgmServer").val();
+                var bgmServer = "http://localhost:8082"
+                var url = bgmServer + data.result.data;
+                $("#bgmContent").html("<a href='" + url + "' target='_blank'>点我播放</a>");
+                $("#path").attr("value", data.result.data);
+            }
+
+        }
+    });
+
+    var submitBgm = function() {
+        $('#addBgmForm').ajaxSubmit({
+            url: "http://localhost:8082" + "/video/addBgm",
+            type: 'POST',
+            success: function(data) {
+
+                if (data.status == 200 && data.msg == 'OK') {
+                    alert('BGM添加成功...')
+                } else {
+                    alert('BGM添加失败...')
+                }
+
+                $("#bgmListMenu").click();
+            }
+        });
+    }
+
+    // 提交时验证表单 API地址：http://www.runoob.com/jquery/jquery-plugin-validate.html
+    $('#addBgmForm').validate({
+        errorElement: 'span', //用什么标签标记错误，默认是 label，可以改成 em。
+        errorClass: 'help-block', // 指定错误提示的 css 类名，可以自定义错误提示的样式。
+        focusInvalid: false, // 提交表单后，未通过验证的表单（第一个或提交之前获得焦点的未通过验证的表单）会获得焦点。
+        ignore: "", // 忽略某些元素不验证
+        rules: {
+            author: {
+                required: true,
+                rangelength: [1,8]
+            },
+            name: {
+                required: true,
+                rangelength: [1,50]
+            },
+            path: {
+                required: true
+            }
+        },
+        messages: {
+            author: {
+                required: "歌手不能为空.",
+                rangelength: "歌手长度请控制在1-8位."
+            },
+            name: {
+                required: "歌曲不能为空.",
+                rangelength: "歌曲长度请控制在1-50位."
+            },
+            path: {
+                required: "路径不能为空."
+            }
+        },
+        invalidHandler: function(event, validator) {
+            $('.alert-danger', $('#addBgmForm')).show();
+        },
+
+        // 可以给未通过验证的元素加效果、闪烁等。
+        highlight: function(element) {
+            $(element).closest('.form-group').addClass('has-error');
+        },
+
+        // 要验证的元素通过验证后的动作，如果跟一个字符串，会当作一个 css 类，也可跟一个函数。
+        success: function(label) {
+            label.closest('.form-group').removeClass('has-error');
+            label.remove();
+        },
+
+        // 指明错误放置的位置，默认情况是：error.appendTo(element.parent());即把错误信息放在验证的元素后面。
+        errorPlacement: function(error, element) {
+            error.insertAfter(element.closest('#input-error'));
+        },
+
+        // 提交事件
+        submitHandler: function(form) {
+            // FIXME
+            submitBgm();
+        }
+    });
+</script>
+
+</body>
+
+</html>
